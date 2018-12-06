@@ -1,0 +1,63 @@
+{
+  "name": "graphql-directives-middlewares",
+  "version": "0.1.0",
+  "description": "GraphQL directives as middlewares",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "repository": "https://github.com/alakarteio/graphql-directives-middlewares",
+  "author": "Fabien JUIF <fabien.juif@gmail.com>",
+  "license": "MIT",
+  "private": false,
+  "engines": {
+    "node": ">=10"
+  },
+  "peerDependencies": {
+    "graphql": "14.x",
+    "graphql-tools": "4.x"
+  },
+  "scripts": {
+    "build": "babel src --source-type module --out-dir dist",
+    "ci": "eslint src"
+  },
+  "devDependencies": {
+    "@babel/cli": "7.1.5",
+    "@babel/core": "7.1.5",
+    "@babel/preset-env": "7.1.5",
+    "eslint": "^5.9.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.14.0",
+    "graphql": "14.0.2",
+    "graphql-tools": "4.0.3",
+    "microbundle": "0.8.3"
+  },
+  "keywords": [
+    "graphql",
+    "directive",
+    "directives",
+    "middleware",
+    "middlewares",
+    "preserve",
+    "order"
+  ],
+  "babel": {
+    "presets": [
+      [
+        "@babel/preset-env",
+        {
+          "targets": {
+            "node": "10"
+          }
+        }
+      ]
+    ]
+  },
+  "eslintConfig": {
+    "extends": "airbnb-base",
+    "rules": {
+      "semi": [
+        "error",
+        "never"
+      ]
+    }
+  }
+}

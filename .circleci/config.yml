@@ -1,0 +1,18 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/node
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+          - dependencies-{{ checksum yarn.lock }}-{{ checksum "package.json" }}
+          - dependencies-
+      - run: yarn
+      - save_cache:
+          paths:
+            - node_modules
+            - ~/.cache/yarn
+          key: dependencies-{{ checksum yarn.lock }}-{{ checksum "package.json" }}
+      - run: yarn ci
