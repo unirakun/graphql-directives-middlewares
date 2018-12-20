@@ -51,7 +51,7 @@ const getResolve = ({
   const __kmeta = {
     args: {},
     registeredResolversCount: 0,
-    baseResolver: field.resolve,
+    baseResolver: field.resolve || _graphql.defaultFieldResolver,
     ...(field.resolve || _graphql.defaultFieldResolver).__kmeta
   };
   __kmeta.registeredResolversCount += 1;

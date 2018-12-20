@@ -48,7 +48,7 @@ const getResolve = ({
   const __kmeta = {
     args: {},
     registeredResolversCount: 0,
-    baseResolver: field.resolve,
+    baseResolver: (field.resolve || defaultFieldResolver),
     ...(field.resolve || defaultFieldResolver).__kmeta,
   }
 
