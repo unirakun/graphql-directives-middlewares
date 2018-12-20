@@ -1,6 +1,6 @@
 {
   "name": "graphql-directives-middlewares",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "GraphQL directives as middlewares",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -10,10 +10,6 @@
   "private": false,
   "engines": {
     "node": ">=10"
-  },
-  "peerDependencies": {
-    "graphql": "14.x",
-    "graphql-tools": "4.x"
   },
   "scripts": {
     "build": "babel src --source-type module --out-dir dist",
