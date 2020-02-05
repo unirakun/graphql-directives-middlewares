@@ -4,7 +4,7 @@
   "description": "GraphQL directives as middlewares",
   "main": "dist/index.js",
   "module": "dist/index.js",
-  "repository": "https://github.com/alakarteio/graphql-directives-middlewares",
+  "repository": "https://github.com/unirakun/graphql-directives-middlewares",
   "author": "Fabien JUIF <fabien.juif@gmail.com>",
   "license": "MIT",
   "private": false,
