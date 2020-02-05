@@ -1,7 +1,7 @@
 # graphql-directives-middlewares
 GraphQL directives as middlewares
 
-[![CircleCI](https://circleci.com/gh/alakarteio/graphql-directives-middlewares.svg?style=shield)](https://circleci.com/gh/alakarteio/graphql-directives-middlewares) [![NPM Version](https://badge.fury.io/js/graphql-directives-middlewares.svg)](https://www.npmjs.com/package/graphql-directives-middlewares)
+[![CircleCI](https://circleci.com/gh/unirakun/graphql-directives-middlewares.svg?style=shield)](https://circleci.com/gh/unirakun/graphql-directives-middlewares) [![NPM Version](https://badge.fury.io/js/graphql-directives-middlewares.svg)](https://www.npmjs.com/package/graphql-directives-middlewares)
 
 ## install
 `yarn add graphql-directives-middlewares`
