@@ -6,12 +6,6 @@ import { SchemaDirectiveVisitor } from 'graphql-tools'
 // right now or in futur releases
 const metaKey = Symbol('metaKey')
 
-const resolvers = new Map()
-const registerResolver = (directiveName, resolver) => {
-  resolver.directiveName = directiveName
-  resolvers.set(directiveName, resolver)
-}
-
 const getResolve = ({ directiveName, params, field, middleware }) => {
   if (!field[metaKey]) {
     field[metaKey] = {
@@ -46,10 +40,8 @@ const getResolve = ({ directiveName, params, field, middleware }) => {
   return (...args) => next(...args)()
 }
 
-export const createVisitFieldDefinition = (directiveName, middleware) => {
-  registerResolver(directiveName, middleware)
-
-  return class extends SchemaDirectiveVisitor {
+export const createVisitFieldDefinition = (directiveName, middleware) =>
+  class extends SchemaDirectiveVisitor {
     /* eslint-disable class-methods-use-this */
     visitFieldDefinition(field) {
       const { args: params } = this
@@ -62,12 +54,9 @@ export const createVisitFieldDefinition = (directiveName, middleware) => {
       })
     }
   }
-}
 
-export const createVisitObject = (directiveName, middleware) => {
-  registerResolver(directiveName, middleware)
-
-  return class extends SchemaDirectiveVisitor {
+export const createVisitObject = (directiveName, middleware) =>
+  class extends SchemaDirectiveVisitor {
     visitObject(type) {
       const fields = type.getFields()
       const { args: params } = this
@@ -82,4 +71,3 @@ export const createVisitObject = (directiveName, middleware) => {
       })
     }
   }
-}

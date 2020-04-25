@@ -13,12 +13,6 @@ var _graphqlTools = require("graphql-tools");
 // we can modify graphql inner object with symbol making sure we don't override fields
 // right now or in futur releases
 const metaKey = Symbol('metaKey');
-const resolvers = new Map();
-
-const registerResolver = (directiveName, resolver) => {
-  resolver.directiveName = directiveName;
-  resolvers.set(directiveName, resolver);
-};
 
 const getResolve = ({
   directiveName,
@@ -60,46 +54,40 @@ const getResolve = ({
   return (...args) => next(...args)();
 };
 
-const createVisitFieldDefinition = (directiveName, middleware) => {
-  registerResolver(directiveName, middleware);
-  return class extends _graphqlTools.SchemaDirectiveVisitor {
-    /* eslint-disable class-methods-use-this */
-    visitFieldDefinition(field) {
-      const {
-        args: params
-      } = this;
+const createVisitFieldDefinition = (directiveName, middleware) => class extends _graphqlTools.SchemaDirectiveVisitor {
+  /* eslint-disable class-methods-use-this */
+  visitFieldDefinition(field) {
+    const {
+      args: params
+    } = this;
+    field.resolve = getResolve({
+      field,
+      directiveName,
+      params,
+      middleware
+    });
+  }
+
+};
+
+exports.createVisitFieldDefinition = createVisitFieldDefinition;
+
+const createVisitObject = (directiveName, middleware) => class extends _graphqlTools.SchemaDirectiveVisitor {
+  visitObject(type) {
+    const fields = type.getFields();
+    const {
+      args: params
+    } = this;
+    Object.values(fields).forEach(field => {
       field.resolve = getResolve({
         field,
         directiveName,
         params,
         middleware
       });
-    }
+    });
+  }
 
-  };
-};
-
-exports.createVisitFieldDefinition = createVisitFieldDefinition;
-
-const createVisitObject = (directiveName, middleware) => {
-  registerResolver(directiveName, middleware);
-  return class extends _graphqlTools.SchemaDirectiveVisitor {
-    visitObject(type) {
-      const fields = type.getFields();
-      const {
-        args: params
-      } = this;
-      Object.values(fields).forEach(field => {
-        field.resolve = getResolve({
-          field,
-          directiveName,
-          params,
-          middleware
-        });
-      });
-    }
-
-  };
 };
 
 exports.createVisitObject = createVisitObject;
