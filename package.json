@@ -12,19 +12,24 @@
     "node": ">=10"
   },
   "scripts": {
+    "test": "jest",
+    "lint": "eslint src",
     "build": "babel src --source-type module --out-dir dist",
-    "ci": "eslint src"
+    "ci": "run-p lint test build"
   },
   "devDependencies": {
-    "@babel/cli": "7.1.5",
-    "@babel/core": "7.1.5",
-    "@babel/preset-env": "7.1.5",
-    "eslint": "^5.9.0",
-    "eslint-config-airbnb-base": "^13.1.0",
-    "eslint-plugin-import": "^2.14.0",
-    "graphql": "14.0.2",
-    "graphql-tools": "4.0.3",
-    "microbundle": "0.8.3"
+    "@babel/cli": "7.8.4",
+    "@babel/core": "7.9.0",
+    "@babel/preset-env": "7.9.5",
+    "babel-jest": "^25.4.0",
+    "eslint": "6.8.0",
+    "eslint-config-airbnb-base": "14.1.0",
+    "eslint-plugin-import": "2.20.2",
+    "graphql": "15.0.0",
+    "graphql-tag": "^2.10.3",
+    "graphql-tools": "5.0.0",
+    "jest": "^25.4.0",
+    "npm-run-all": "4.1.5"
   },
   "keywords": [
     "graphql",
@@ -35,25 +40,18 @@
     "preserve",
     "order"
   ],
-  "babel": {
-    "presets": [
-      [
-        "@babel/preset-env",
-        {
-          "targets": {
-            "node": "10"
-          }
-        }
-      ]
-    ]
-  },
   "eslintConfig": {
     "extends": "airbnb-base",
+    "ignorePatterns": [
+      "dist/**"
+    ],
     "rules": {
       "semi": [
         "error",
         "never"
-      ]
+      ],
+      "import/prefer-default-export": "off",
+      "no-param-reassign": "off"
     }
   }
 }

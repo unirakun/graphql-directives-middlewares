@@ -1,21 +1,16 @@
-/* eslint-disable no-underscore-dangle */
+/* eslint-disable import/no-extraneous-dependencies, no-underscore-dangle */
 import { defaultFieldResolver } from 'graphql'
 import { SchemaDirectiveVisitor } from 'graphql-tools'
 
 const resolvers = new Map()
 
 const registerResolver = (directiveName, resolver) => {
-  resolver.directiveName = directiveName // eslint-disable-line no-param-reassign
+  resolver.directiveName = directiveName
   resolvers.set(directiveName, resolver)
 }
 
-const getMiddlewareResolver = ({
-  baseResolver,
-  directives,
-  params,
-}) => {
-  const middlewares = directives
-    .map(({ name }) => resolvers.get(name.value))
+const getMiddlewareResolver = ({ baseResolver, directives, params }) => {
+  const middlewares = directives.map(({ name }) => resolvers.get(name.value))
 
   middlewares.push(() => baseResolver)
 
@@ -40,28 +35,20 @@ const getMiddlewareResolver = ({
   }
 }
 
-const getResolve = ({
-  directiveName,
-  args,
-  field,
-}) => {
+const getResolve = ({ directiveName, args, field }) => {
   const __kmeta = {
     args: {},
     registeredResolversCount: 0,
-    baseResolver: (field.resolve || defaultFieldResolver),
+    baseResolver: field.resolve || defaultFieldResolver,
     ...(field.resolve || defaultFieldResolver).__kmeta,
   }
 
   __kmeta.registeredResolversCount += 1
   __kmeta.args[directiveName] = args
 
-  const {
-    astNode,
-  } = field
+  const { astNode } = field
 
-  const {
-    directives,
-  } = astNode
+  const { directives } = astNode
 
   if (__kmeta.registeredResolversCount !== directives.length) {
     return { __kmeta }
@@ -74,12 +61,11 @@ const getResolve = ({
   })
 }
 
-// eslint-disable-next-line import/prefer-default-export
 export const createVisitFieldDefinition = (directiveName, resolver) => {
   registerResolver(directiveName, resolver)
 
   return class extends SchemaDirectiveVisitor {
-    /* eslint-disable no-param-reassign, class-methods-use-this */
+    /* eslint-disable class-methods-use-this */
     visitFieldDefinition(field) {
       field.resolve = getResolve({
         field,
