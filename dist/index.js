@@ -9,12 +9,11 @@ var _graphql = require("graphql");
 
 var _graphqlTools = require("graphql-tools");
 
-/* eslint-disable no-underscore-dangle */
+/* eslint-disable import/no-extraneous-dependencies, no-underscore-dangle */
 const resolvers = new Map();
 
 const registerResolver = (directiveName, resolver) => {
-  resolver.directiveName = directiveName; // eslint-disable-line no-param-reassign
-
+  resolver.directiveName = directiveName;
   resolvers.set(directiveName, resolver);
 };
 
@@ -74,13 +73,12 @@ const getResolve = ({
     baseResolver: __kmeta.baseResolver,
     params: __kmeta.args
   });
-}; // eslint-disable-next-line import/prefer-default-export
-
+};
 
 const createVisitFieldDefinition = (directiveName, resolver) => {
   registerResolver(directiveName, resolver);
   return class extends _graphqlTools.SchemaDirectiveVisitor {
-    /* eslint-disable no-param-reassign, class-methods-use-this */
+    /* eslint-disable class-methods-use-this */
     visitFieldDefinition(field) {
       field.resolve = getResolve({
         field,

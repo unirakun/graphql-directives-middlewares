@@ -1,0 +1,27 @@
+name: Quality
+
+on: [push]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v1
+      - name: Caching
+        uses: actions/cache@v1
+        with:
+          path: ~/.cache
+          key: cache-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            cache-${{ hashFiles('**/yarn.lock') }}
+      - name: Use Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: '13.12.x'
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+      - name: Lint & Tests
+        run: yarn ci
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
