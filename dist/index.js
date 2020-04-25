@@ -12,7 +12,7 @@ var _graphqlTools = require("graphql-tools");
 /* eslint-disable import/no-extraneous-dependencies, no-underscore-dangle */
 // we can modify graphql inner object with symbol making sure we don't override fields
 // right now or in futur releases
-const metaKey = Symbol();
+const metaKey = Symbol('metaKey');
 const resolvers = new Map();
 
 const registerResolver = (directiveName, resolver) => {
@@ -48,9 +48,13 @@ const getResolve = ({
     } // take the next middleware and try to call it
 
 
-    const middleware = field[metaKey].middlewares[calls];
-    if (!middleware) return;
-    return middleware.impl(middleware.params, next(...args))(...args);
+    const nextMiddleware = field[metaKey].middlewares[calls];
+
+    if (!nextMiddleware) {
+      throw new Error('No more middleware but no base resolver found!');
+    }
+
+    return nextMiddleware.impl(nextMiddleware.params, next(...args))(...args);
   };
 
   return (...args) => next(...args)();
