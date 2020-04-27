@@ -1,3 +1,4 @@
+/* eslint-env jest */
 import gql from 'graphql-tag'
 import { makeExecutableSchema } from 'graphql-tools'
 import { graphql } from 'graphql'
@@ -510,7 +511,7 @@ describe('graphql-directives-middlewares', () => {
     const called = []
     // - first
     const impl = jest.fn(() => ['fake'])
-    const middleware = jest.fn((params, next) => (...args) => {
+    const middleware = jest.fn(() => (...args) => {
       called.push('first')
       return impl(...args)
     })
