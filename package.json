@@ -16,7 +16,7 @@
     "lint": "eslint src",
     "build": "babel src --source-type module --out-dir dist",
     "coverage": "jest --coverage && cat ./coverage/lcov.info | yarn coveralls",
-    "ci": "run-p lint test build"
+    "ci": "run-p lint coverage build"
   },
   "devDependencies": {
     "@babel/cli": "7.8.4",
