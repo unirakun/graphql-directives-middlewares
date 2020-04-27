@@ -15,6 +15,7 @@
     "test": "jest",
     "lint": "eslint src",
     "build": "babel src --source-type module --out-dir dist",
+    "coverage": "jest --coverage && cat ./coverage/lcov.info | yarn coveralls",
     "ci": "run-p lint test build"
   },
   "devDependencies": {
@@ -22,6 +23,7 @@
     "@babel/core": "7.9.0",
     "@babel/preset-env": "7.9.5",
     "babel-jest": "^25.4.0",
+    "coveralls": "^3.1.0",
     "eslint": "6.8.0",
     "eslint-config-airbnb-base": "14.1.0",
     "eslint-plugin-import": "2.20.2",

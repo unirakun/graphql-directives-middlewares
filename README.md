@@ -1,8 +1,9 @@
 # graphql-directives-middlewares
 
-GraphQL directives as middlewares
+> GraphQL directives as middlewares
 
-[![CircleCI](https://circleci.com/gh/unirakun/graphql-directives-middlewares.svg?style=shield)](https://circleci.com/gh/unirakun/graphql-directives-middlewares) [![NPM Version](https://badge.fury.io/js/graphql-directives-middlewares.svg)](https://www.npmjs.com/package/graphql-directives-middlewares)
+[![npm bundle size](https://img.shields.io/bundlephobia/minzip/graphql-directives-middlewares)](https://bundlephobia.com/result?p=graphql-directives-middlewares)
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/unirakun/graphql-directives-middlewares/Quality)](https://github.com/unirakun/graphql-directives-middlewares/actions?query=branch%3Amaster) [![NPM Version](https://badge.fury.io/js/graphql-directives-middlewares.svg)](https://www.npmjs.com/package/graphql-directives-middlewares) [![Coveralls github](https://img.shields.io/coveralls/github/unirakun/graphql-directives-middlewares.svg)](https://coveralls.io/github/unirakun/graphql-directives-middlewares)
 
 ## install
 
