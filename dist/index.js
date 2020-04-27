@@ -3,91 +3,91 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.createVisitFieldDefinition = void 0;
+exports.createVisitObject = exports.createVisitFieldDefinition = void 0;
 
 var _graphql = require("graphql");
 
 var _graphqlTools = require("graphql-tools");
 
 /* eslint-disable import/no-extraneous-dependencies, no-underscore-dangle */
-const resolvers = new Map();
-
-const registerResolver = (directiveName, resolver) => {
-  resolver.directiveName = directiveName;
-  resolvers.set(directiveName, resolver);
-};
-
-const getMiddlewareResolver = ({
-  baseResolver,
-  directives,
-  params
-}) => {
-  const middlewares = directives.map(({
-    name
-  }) => resolvers.get(name.value));
-  middlewares.push(() => baseResolver); // this is the final resolver
-
-  return async (...args) => {
-    let index = 0;
-
-    const next = async () => {
-      const nextMiddleware = middlewares[index];
-      index += 1;
-      const nextRes = await nextMiddleware(params[nextMiddleware.directiveName], next)(...args);
-      return nextRes;
-    };
-
-    const res = await next();
-    return res;
-  };
-};
+// we can modify graphql inner object with symbol making sure we don't override fields
+// right now or in futur releases
+const metaKey = Symbol('metaKey');
 
 const getResolve = ({
   directiveName,
-  args,
-  field
+  params,
+  field,
+  middleware
 }) => {
-  const __kmeta = {
-    args: {},
-    registeredResolversCount: 0,
-    baseResolver: field.resolve || _graphql.defaultFieldResolver,
-    ...(field.resolve || _graphql.defaultFieldResolver).__kmeta
-  };
-  __kmeta.registeredResolversCount += 1;
-  __kmeta.args[directiveName] = args;
-  const {
-    astNode
-  } = field;
-  const {
-    directives
-  } = astNode;
-
-  if (__kmeta.registeredResolversCount !== directives.length) {
-    return {
-      __kmeta
+  if (!field[metaKey]) {
+    field[metaKey] = {
+      baseResolver: field.resolve || _graphql.defaultFieldResolver,
+      middlewares: []
     };
   }
 
-  return getMiddlewareResolver({
-    directives,
-    baseResolver: __kmeta.baseResolver,
-    params: __kmeta.args
-  });
-};
+  let calls = -1;
+  field[metaKey].middlewares.push({
+    name: directiveName,
+    impl: middleware,
+    params
+  }); // next function is recursive, it give the resolve args to each middleware
 
-const createVisitFieldDefinition = (directiveName, resolver) => {
-  registerResolver(directiveName, resolver);
-  return class extends _graphqlTools.SchemaDirectiveVisitor {
-    /* eslint-disable class-methods-use-this */
-    visitFieldDefinition(field) {
-      field.resolve = getResolve({
-        field,
-        directiveName,
-        args: this.args
-      });
+  const next = (...args) => async () => {
+    calls += 1; // at the end we call the real resolver
+
+    if (calls === field[metaKey].middlewares.length) {
+      return field[metaKey].baseResolver(...args);
+    } // take the next middleware and try to call it
+
+
+    const nextMiddleware = field[metaKey].middlewares[calls];
+
+    if (!nextMiddleware) {
+      throw new Error('No more middleware but no base resolver found!');
     }
 
+    return nextMiddleware.impl(nextMiddleware.params, next(...args))(...args);
   };
+
+  return (...args) => next(...args)();
+};
+
+const createVisitFieldDefinition = (directiveName, middleware) => class extends _graphqlTools.SchemaDirectiveVisitor {
+  /* eslint-disable class-methods-use-this */
+  visitFieldDefinition(field) {
+    const {
+      args: params
+    } = this;
+    field.resolve = getResolve({
+      field,
+      directiveName,
+      params,
+      middleware
+    });
+  }
+
 };
 
 exports.createVisitFieldDefinition = createVisitFieldDefinition;
+
+const createVisitObject = (directiveName, middleware) => class extends _graphqlTools.SchemaDirectiveVisitor {
+  visitObject(type) {
+    const fields = type.getFields();
+    const {
+      args: params
+    } = this;
+    Object.values(fields).forEach(field => {
+      field.resolve = getResolve({
+        field,
+        directiveName,
+        params,
+        middleware
+      });
+    });
+  }
+
+};
+
+exports.createVisitObject = createVisitObject;
