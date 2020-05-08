@@ -568,4 +568,62 @@ describe('graphql-directives-middlewares', () => {
     expect(impl2).toHaveBeenCalledTimes(0)
     expect(res.data).toEqual({ list: ['fake'] })
   })
+
+  it('should add a directive with Error', async () => {
+    const impl = jest.fn(() => { throw new Error() })
+    const middleware = jest.fn((params, next) => (...args) => {
+      impl(...args)
+      next()
+    })
+
+    // directive definition & implementation
+    const firstImpl = createVisitFieldDefinition('first', middleware)
+
+    // create gql schema
+    const schema = makeExecutableSchema({
+      typeDefs: gql`
+        directive @first on FIELD_DEFINITION
+
+        type Query {
+          list: [String] @first
+        }
+      `,
+      resolvers: {
+        Query: {
+          list: () => ['john', 'smith'],
+        },
+      },
+      schemaDirectives: {
+        first: firstImpl,
+      },
+    })
+
+    // run & asserts
+    const res1 = await graphql(
+      schema,
+      `
+        {
+          list
+        }
+      `,
+    )
+
+    const res2 = await graphql(
+      schema,
+      `
+        {
+          list
+        }
+      `,
+    )
+
+    expect(impl).toHaveBeenCalledTimes(2)
+    expect(impl.mock.calls[0][3]).toEqual(
+      expect.objectContaining({
+        fieldName: 'list',
+      }),
+    )
+    expect(res1.data).toEqual({ list: null })
+    expect(res2.data).toEqual({ list: null })
+  })
 })

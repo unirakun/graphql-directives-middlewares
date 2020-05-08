@@ -14,30 +14,33 @@ const getResolve = ({ directiveName, params, field, middleware }) => {
     }
   }
 
-  let calls = -1
   field[metaKey].middlewares.push({
     name: directiveName,
     impl: middleware,
     params,
   })
 
-  // next function is recursive, it give the resolve args to each middleware
-  const next = (...args) => async () => {
-    calls += 1
-    // at the end we call the real resolver
-    if (calls === field[metaKey].middlewares.length) {
-      return field[metaKey].baseResolver(...args)
+  return (...args) => {
+    let calls = -1
+
+    // next function is recursive, it give the resolve args to each middleware
+    const next = async () => {
+      calls += 1
+      // at the end we call the real resolver
+      if (calls === field[metaKey].middlewares.length) {
+        return field[metaKey].baseResolver(...args)
+      }
+
+      // take the next middleware and try to call it
+      const nextMiddleware = field[metaKey].middlewares[calls]
+      if (!nextMiddleware) {
+        throw new Error('No more middleware but no base resolver found!')
+      }
+      return nextMiddleware.impl(nextMiddleware.params, next)(...args)
     }
 
-    // take the next middleware and try to call it
-    const nextMiddleware = field[metaKey].middlewares[calls]
-    if (!nextMiddleware) {
-      throw new Error('No more middleware but no base resolver found!')
-    }
-    return nextMiddleware.impl(nextMiddleware.params, next(...args))(...args)
+    return next()
   }
-
-  return (...args) => next(...args)()
 }
 
 export const createVisitFieldDefinition = (directiveName, middleware) =>
