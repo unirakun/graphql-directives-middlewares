@@ -35,7 +35,7 @@ const getResolve = ({
   return (...args) => {
     let calls = -1; // next function is recursive, it give the resolve args to each middleware
 
-    const next = async () => {
+    const next = () => {
       calls += 1; // at the end we call the real resolver
 
       if (calls === field[metaKey].middlewares.length) {

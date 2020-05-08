@@ -1,7 +1,7 @@
 /* eslint-env jest */
 import gql from 'graphql-tag'
 import { makeExecutableSchema } from 'graphql-tools'
-import { graphql } from 'graphql'
+import { graphql, GraphQLError } from 'graphql'
 import { createVisitObject, createVisitFieldDefinition } from './dist/index'
 
 describe('graphql-directives-middlewares', () => {
@@ -569,11 +569,11 @@ describe('graphql-directives-middlewares', () => {
     expect(res.data).toEqual({ list: ['fake'] })
   })
 
-  it('should add a directive with Error', async () => {
-    const impl = jest.fn(() => { throw new Error() })
+  it('should process the whole middlewares chain after a previous request is in error caused by a middleware', async () => {
+    const impl = jest.fn()
     const middleware = jest.fn((params, next) => (...args) => {
       impl(...args)
-      next()
+      return next()
     })
 
     // directive definition & implementation
@@ -599,6 +599,10 @@ describe('graphql-directives-middlewares', () => {
     })
 
     // run & asserts
+    // - first run on error (from middleware)
+    impl.mockImplementationOnce(() => {
+      throw new Error('an error')
+    })
     const res1 = await graphql(
       schema,
       `
@@ -607,7 +611,15 @@ describe('graphql-directives-middlewares', () => {
         }
       `,
     )
+    expect(impl).toHaveBeenCalledTimes(1)
+    expect(res1).toEqual({
+      errors: [new GraphQLError('an error')],
+      data: {
+        list: null,
+      },
+    })
 
+    // - second run ok (no error)
     const res2 = await graphql(
       schema,
       `
@@ -616,14 +628,81 @@ describe('graphql-directives-middlewares', () => {
         }
       `,
     )
-
     expect(impl).toHaveBeenCalledTimes(2)
-    expect(impl.mock.calls[0][3]).toEqual(
-      expect.objectContaining({
-        fieldName: 'list',
-      }),
+    expect(res2).toEqual({
+      data: {
+        list: ['john', 'smith'],
+      },
+    })
+  })
+
+  it('should process the whole middlewares chain after a previous request is in error caused by the resolver', async () => {
+    const impl = jest.fn()
+    const middleware = jest.fn((params, next) => (...args) => {
+      impl(...args)
+      next()
+    })
+
+    // directive definition & implementation
+    const firstImpl = createVisitFieldDefinition('first', middleware)
+
+    // create gql schema
+    const resolver = jest.fn(() => ['john', 'smith'])
+    const schema = makeExecutableSchema({
+      typeDefs: gql`
+        directive @first on FIELD_DEFINITION
+
+        type Query {
+          list: [String] @first
+        }
+      `,
+      resolvers: {
+        Query: {
+          list: resolver,
+        },
+      },
+      schemaDirectives: {
+        first: firstImpl,
+      },
+    })
+
+    // run & asserts
+    // - first run with leaf resolver error
+    resolver.mockImplementationOnce(() => {
+      throw new GraphQLError('resolver error')
+    })
+    const res1 = await graphql(
+      schema,
+      `
+        {
+          list
+        }
+      `,
     )
-    expect(res1.data).toEqual({ list: null })
-    expect(res2.data).toEqual({ list: null })
+    expect(impl).toHaveBeenCalledTimes(1)
+    expect(resolver).toHaveBeenCalledTimes(1)
+    expect(res1).toEqual({
+      errors: [new GraphQLError('resolver error')],
+      data: {
+        list: null,
+      },
+    })
+
+    // - second run ok (no error)
+    const res2 = await graphql(
+      schema,
+      `
+        {
+          list
+        }
+      `,
+    )
+    expect(impl).toHaveBeenCalledTimes(2)
+    expect(resolver).toHaveBeenCalledTimes(2)
+    expect(res2).toEqual({
+      data: {
+        list: ['john', 'smith'],
+      },
+    })
   })
 })
