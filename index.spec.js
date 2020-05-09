@@ -640,7 +640,7 @@ describe('graphql-directives-middlewares', () => {
     const impl = jest.fn()
     const middleware = jest.fn((params, next) => (...args) => {
       impl(...args)
-      next()
+      return next()
     })
 
     // directive definition & implementation
